@@ -6,7 +6,7 @@ use nom::{
         complete::{alpha1, digit1},
         multispace0,
     },
-    combinator::{map, map_opt, map_res},
+    combinator::map,
     multi::separated_list1,
     sequence::{delimited, pair, terminated},
 };
@@ -94,7 +94,7 @@ fn parse_expr(input: &str) -> IResult<&str, Expr> {
     .parse(input)
 }
 
-pub fn parse_string(content: &str) -> Vec<Line> {
+pub fn parse_string(content: &str) -> Option<Vec<Line>> {
     let x: Vec<_> = content
         .lines()
         .map(|x| remove_comment(x))
@@ -104,6 +104,7 @@ pub fn parse_string(content: &str) -> Vec<Line> {
         .filter(|(_, x)| !x.is_empty())
         .collect();
 
+    let mut found_error = false;
     let mut lines = vec![];
 
     for (line, s) in x {
@@ -115,6 +116,7 @@ pub fn parse_string(content: &str) -> Vec<Line> {
                 Err::Error(e) => {
                     let input = e.input;
                     println!("Parsing error on line {line}: Couldn't parse '{input}'");
+                    found_error = true;
                 }
                 Err::Failure(_) => todo!(),
             }
@@ -130,6 +132,7 @@ pub fn parse_string(content: &str) -> Vec<Line> {
                 "Parsing error on line {line}: Couldn't parse '{}'",
                 result.0
             );
+            found_error = true;
         }
 
         lines.push(Line {
@@ -138,5 +141,5 @@ pub fn parse_string(content: &str) -> Vec<Line> {
         });
     }
 
-    lines
+    if found_error { None } else { Some(lines) }
 }
