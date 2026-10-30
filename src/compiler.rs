@@ -1,24 +1,24 @@
 use crate::{Arg, Expr, Instruction, Line, Register};
 
-pub const ALU: u16 = 0b01000000_00000000;
-pub const IO: u16 = 0b10000000_00000000;
+const ALU: u16 = 0b01000000_00000000;
+const IO: u16 = 0b10000000_00000000;
 
-pub const BITWISE_OR: u16 = 0b01000000_00000000;
-pub const BITWISE_NAND: u16 = 0b01000000_00000001;
-pub const BITWISE_AND: u16 = 0b01000000_00000010;
-pub const BITWISE_NOR: u16 = 0b01000000_00000011;
-pub const BITWISE_ADD: u16 = 0b01000000_00000100;
-pub const BITWISE_SUB: u16 = 0b01000000_00000101;
+const BITWISE_OR: u16 = 0b01000000_00000000;
+const BITWISE_NAND: u16 = 0b01000000_00000001;
+const BITWISE_AND: u16 = 0b01000000_00000010;
+const BITWISE_NOR: u16 = 0b01000000_00000011;
+const BITWISE_ADD: u16 = 0b01000000_00000100;
+const BITWISE_SUB: u16 = 0b01000000_00000101;
 
-pub const READ_RAM_U8: u16 = 0b0000;
-pub const READ_RAM_U16: u16 = 0b0001;
-pub const WRITE_RAM_U8: u16 = 0b0010;
-pub const WRITE_RAM_U16: u16 = 0b0011;
-pub const OUTPUT: u16 = 0b0100;
+const READ_RAM_U8: u16 = 0b0000;
+const READ_RAM_U16: u16 = 0b0001;
+const WRITE_RAM_U8: u16 = 0b0010;
+const WRITE_RAM_U16: u16 = 0b0011;
+const OUTPUT: u16 = 0b0100;
 
-pub const ARG_A_POS: usize = 11;
-pub const ARG_B_POS: usize = 7;
-pub const DEST_POS: usize = 4;
+const ARG_A_POS: usize = 11;
+const ARG_B_POS: usize = 7;
+const DEST_POS: usize = 4;
 
 pub type InstructionCompiler = fn(&Instruction) -> Result<u16, String>;
 
@@ -139,7 +139,7 @@ fn compile_operation(instruction: &Instruction, opcode: u16) -> Result<u16, Stri
     }
 }
 
-fn expect_arg_count(instruction: &Instruction, amount: usize) -> Result<(), String> {
+pub fn expect_arg_count(instruction: &Instruction, amount: usize) -> Result<(), String> {
     if instruction.args.len() != amount {
         return Err(format!(
             "Instruction {} expects {} arguments. Received {}",

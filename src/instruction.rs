@@ -11,7 +11,7 @@ pub enum Register {
 }
 
 impl Register {
-    pub fn u16(&self) -> u16 {
+    pub fn u8(&self) -> u8 {
         match self {
             Register::Zero => 0,
             Register::Reg1 => 1,
@@ -22,6 +22,10 @@ impl Register {
             Register::Reg6 => 6,
             Register::RSP => 7,
         }
+    }
+
+    pub fn u16(&self) -> u16 {
+        self.u8() as u16
     }
 }
 
