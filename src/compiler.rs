@@ -10,11 +10,8 @@ const BITWISE_NOR: u16 = 0b01000000_00000011;
 const BITWISE_ADD: u16 = 0b01000000_00000100;
 const BITWISE_SUB: u16 = 0b01000000_00000101;
 
-const READ_RAM_U8: u16 = 0b0000;
 const READ_RAM_U16: u16 = 0b0001;
-const WRITE_RAM_U8: u16 = 0b0010;
 const WRITE_RAM_U16: u16 = 0b0011;
-const OUTPUT: u16 = 0b0100;
 
 const ARG_A_POS: usize = 11;
 const ARG_B_POS: usize = 7;
