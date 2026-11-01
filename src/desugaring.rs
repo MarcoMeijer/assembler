@@ -41,7 +41,7 @@ fn desugar_jump(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) 
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "mov".into(),
-            args: vec![Arg::Register(Register::Reg1), instruction.args[0].clone()],
+            args: vec![Arg::Register(Register::TX), instruction.args[0].clone()],
         }),
     });
 
@@ -72,7 +72,7 @@ fn desugar_function_call(
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "mov".into(),
-            args: vec![Arg::Register(Register::Reg1), Arg::Constant(10)],
+            args: vec![Arg::Register(Register::TX), Arg::Constant(10)],
         }),
     });
 
@@ -80,7 +80,7 @@ fn desugar_function_call(
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "add".into(),
-            args: vec![Arg::Register(Register::Reg1), Arg::Register(Register::RIP)],
+            args: vec![Arg::Register(Register::TX), Arg::Register(Register::RIP)],
         }),
     });
 
@@ -88,7 +88,7 @@ fn desugar_function_call(
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "mov".into(),
-            args: vec![Arg::Ram(Register::RSP), Arg::Register(Register::Reg1)],
+            args: vec![Arg::Ram(Register::RSP), Arg::Register(Register::TX)],
         }),
     });
 
@@ -96,7 +96,7 @@ fn desugar_function_call(
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "mov".into(),
-            args: vec![Arg::Register(Register::Reg1), Arg::Constant(2)],
+            args: vec![Arg::Register(Register::TX), Arg::Constant(2)],
         }),
     });
 
@@ -104,7 +104,7 @@ fn desugar_function_call(
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "add".into(),
-            args: vec![Arg::Register(Register::RSP), Arg::Register(Register::Reg1)],
+            args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
         }),
     });
 
@@ -112,7 +112,7 @@ fn desugar_function_call(
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "mov".into(),
-            args: vec![Arg::Register(Register::Reg1), instruction.args[0].clone()],
+            args: vec![Arg::Register(Register::TX), instruction.args[0].clone()],
         }),
     });
 
@@ -140,7 +140,7 @@ fn desugar_return(result: &mut Vec<Line>, line: &Line, instruction: &Instruction
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "mov".into(),
-            args: vec![Arg::Register(Register::Reg1), Arg::Constant(2)],
+            args: vec![Arg::Register(Register::TX), Arg::Constant(2)],
         }),
     });
 
@@ -148,7 +148,7 @@ fn desugar_return(result: &mut Vec<Line>, line: &Line, instruction: &Instruction
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
             name: "sub".into(),
-            args: vec![Arg::Register(Register::RSP), Arg::Register(Register::Reg1)],
+            args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
         }),
     });
 

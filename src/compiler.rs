@@ -99,7 +99,7 @@ fn compile_mov(instruction: &Instruction) -> Result<u16, String> {
             return Err("Can't move ram value directly into ram".into());
         }
         (Arg::Register(r), Arg::Constant(x)) => {
-            if *r != Register::Reg1 {
+            if *r != Register::TX {
                 return Err("Can only move constant into register 1".into());
             }
             Ok(*x)

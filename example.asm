@@ -1,19 +1,16 @@
 ; start of program
-mov reg1, 0
-mov rsp, reg1
+mov tx, 0
+mov rsp, tx
 jmp main
 
 
 function:
-  mov reg1, 24
-  mov reg3, reg1
+  mov tx, 24
+  mov ax, tx
   ret
 
 
 main:
   call function
-  out reg3
+  out ax
 
-  call function
-  out reg3
-  

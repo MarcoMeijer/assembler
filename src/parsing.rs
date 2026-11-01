@@ -29,13 +29,21 @@ fn parse_literal<T: Clone + Copy>(
 
 fn parse_register(input: &str) -> IResult<&str, Register> {
     alt((
-        parse_literal("reg1", Register::Reg1),
-        parse_literal("reg2", Register::Reg2),
-        parse_literal("reg3", Register::Reg3),
-        parse_literal("reg4", Register::Reg4),
-        parse_literal("reg5", Register::Reg5),
+        parse_literal("tx", Register::TX),
+        parse_literal("ax", Register::AX),
+        parse_literal("bx", Register::BX),
+        parse_literal("cx", Register::CX),
+        parse_literal("dx", Register::DX),
         parse_literal("rip", Register::RIP),
         parse_literal("rsp", Register::RSP),
+        // numbered registers
+        parse_literal("reg1", Register::TX),
+        parse_literal("reg2", Register::AX),
+        parse_literal("reg3", Register::BX),
+        parse_literal("reg4", Register::CX),
+        parse_literal("reg5", Register::DX),
+        parse_literal("reg6", Register::RIP),
+        parse_literal("reg7", Register::RSP),
     ))
     .parse(input)
 }

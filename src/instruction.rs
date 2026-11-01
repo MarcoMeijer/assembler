@@ -1,11 +1,11 @@
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Register {
     Zero,
-    Reg1,
-    Reg2,
-    Reg3,
-    Reg4,
-    Reg5,
+    TX,
+    AX,
+    BX,
+    CX,
+    DX,
     RIP,
     RSP,
 }
@@ -14,11 +14,11 @@ impl Register {
     pub fn u8(&self) -> u8 {
         match self {
             Register::Zero => 0,
-            Register::Reg1 => 1,
-            Register::Reg2 => 2,
-            Register::Reg3 => 3,
-            Register::Reg4 => 4,
-            Register::Reg5 => 5,
+            Register::TX => 1,
+            Register::AX => 2,
+            Register::BX => 3,
+            Register::CX => 4,
+            Register::DX => 5,
             Register::RIP => 6,
             Register::RSP => 7,
         }
