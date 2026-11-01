@@ -5,9 +5,9 @@ pub enum Register {
     AX,
     BX,
     CX,
-    DX,
-    RIP,
+    RBP,
     RSP,
+    RIP,
 }
 
 impl Register {
@@ -18,9 +18,9 @@ impl Register {
             Register::AX => 2,
             Register::BX => 3,
             Register::CX => 4,
-            Register::DX => 5,
-            Register::RIP => 6,
-            Register::RSP => 7,
+            Register::RBP => 5,
+            Register::RSP => 6,
+            Register::RIP => 7,
         }
     }
 

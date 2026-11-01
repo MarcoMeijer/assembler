@@ -22,6 +22,16 @@ pub fn desugar_lines(lines: Vec<Line>) -> Option<Vec<Line>> {
                     continue;
                 }
 
+                "push" => {
+                    desugar_push(&mut result, &line, instruction)?;
+                    continue;
+                }
+
+                "pop" => {
+                    desugar_pop(&mut result, &line, instruction)?;
+                    continue;
+                }
+
                 "mov" => {
                     if desugar_constant_move(&mut result, &line, instruction) {
                         continue;
@@ -171,6 +181,110 @@ fn desugar_return(result: &mut Vec<Line>, line: &Line, instruction: &Instruction
             args: vec![Arg::Register(Register::RIP), Arg::Ram(Register::RSP)],
         }),
     });
+
+    Some(())
+}
+
+fn desugar_push(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -> Option<()> {
+    if instruction.args.len() != 1 {
+        println!(
+            "Compile error on line {}: 'Push expects 1 argument'",
+            line.line_number
+        );
+        return None;
+    }
+
+    let register = match instruction.args[0] {
+        Arg::Constant(_) | Arg::Tag(_) | Arg::Ram(_) => {
+            result.push(Line {
+                line_number: line.line_number,
+                expr: Expr::Instruction(Instruction {
+                    name: "mov".into(),
+                    args: vec![Arg::Register(Register::TX), instruction.args[0].clone()],
+                }),
+            });
+            Register::TX
+        }
+        Arg::Register(r) => r,
+    };
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: "mov".into(),
+            args: vec![Arg::Ram(Register::RSP), Arg::Register(register)],
+        }),
+    });
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: "mov".into(),
+            args: vec![Arg::Register(Register::TX), Arg::Constant(2)],
+        }),
+    });
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: "add".into(),
+            args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
+        }),
+    });
+
+    Some(())
+}
+
+fn desugar_pop(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -> Option<()> {
+    if instruction.args.len() != 1 {
+        println!(
+            "Compile error on line {}: 'Pop expects one argument'",
+            line.line_number
+        );
+        return None;
+    }
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: "mov".into(),
+            args: vec![Arg::Register(Register::TX), Arg::Constant(2)],
+        }),
+    });
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: "sub".into(),
+            args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
+        }),
+    });
+
+    let register = match instruction.args[0] {
+        Arg::Constant(_) | Arg::Tag(_) | Arg::Ram(_) => Register::TX,
+        Arg::Register(r) => r,
+    };
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: "mov".into(),
+            args: vec![Arg::Register(register), Arg::Ram(Register::RSP)],
+        }),
+    });
+
+    match instruction.args[0] {
+        Arg::Ram(_) => {
+            result.push(Line {
+                line_number: line.line_number,
+                expr: Expr::Instruction(Instruction {
+                    name: "mov".into(),
+                    args: vec![instruction.args[0].clone(), Arg::Register(Register::TX)],
+                }),
+            });
+        }
+        _ => {}
+    }
 
     Some(())
 }

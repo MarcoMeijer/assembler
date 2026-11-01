@@ -3,13 +3,28 @@ mov rsp, 0
 jmp main
 
 
-function:
-  mov ax, 24
-  add ax, 4
+add:
+  push rbp
+  mov rbp, rsp
+
+  ; mov [rbp - 2], cx
+  mov tx, 2
+  add tx, rbp, tx
+  mov [tx], cx
+
+  ; mov ax, [rbp - 2]
+  mov tx, 2
+  add tx, rbp, tx
+  mov ax, [tx]
+
+  add ax, 2
+
+  pop rbp
   ret
 
 
 main:
-  call function
+  mov cx, 20
+  call add
   out ax
 
