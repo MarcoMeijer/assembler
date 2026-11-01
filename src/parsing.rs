@@ -4,7 +4,7 @@ use nom::{
     bytes::complete::tag,
     character::complete::{alpha1, digit1, multispace0},
     combinator::map,
-    multi::{separated_list0, separated_list1},
+    multi::separated_list0,
     sequence::{delimited, pair, terminated},
 };
 
@@ -34,7 +34,7 @@ fn parse_register(input: &str) -> IResult<&str, Register> {
         parse_literal("reg3", Register::Reg3),
         parse_literal("reg4", Register::Reg4),
         parse_literal("reg5", Register::Reg5),
-        parse_literal("reg6", Register::Reg6),
+        parse_literal("rip", Register::RIP),
         parse_literal("rsp", Register::RSP),
     ))
     .parse(input)

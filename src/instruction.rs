@@ -6,7 +6,7 @@ pub enum Register {
     Reg3,
     Reg4,
     Reg5,
-    Reg6,
+    RIP,
     RSP,
 }
 
@@ -19,7 +19,7 @@ impl Register {
             Register::Reg3 => 3,
             Register::Reg4 => 4,
             Register::Reg5 => 5,
-            Register::Reg6 => 6,
+            Register::RIP => 6,
             Register::RSP => 7,
         }
     }

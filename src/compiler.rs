@@ -1,7 +1,6 @@
 use crate::{Arg, Expr, Instruction, Line, Register};
 
 const ALU: u16 = 0b01000000_00000000;
-const IO: u16 = 0b10000000_00000000;
 
 const BITWISE_OR: u16 = 0b01000000_00000000;
 const BITWISE_NAND: u16 = 0b01000000_00000001;
