@@ -1,12 +1,11 @@
 ; start of program
-mov tx, 0
-mov rsp, tx
+mov rsp, 0
 jmp main
 
 
 function:
-  mov tx, 24
-  mov ax, tx
+  mov ax, 24
+  add ax, 4
   ret
 
 
