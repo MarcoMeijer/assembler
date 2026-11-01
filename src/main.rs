@@ -4,6 +4,7 @@ mod desugaring;
 mod instruction;
 mod parsing;
 mod tag_resolver;
+mod virtual_machine;
 
 pub use compile_8bit::*;
 pub use compiler::*;
@@ -23,6 +24,14 @@ struct AssemblerArgs {
     /// if using the 8bit instructions or not
     #[argh(switch, short = 'b')]
     bit8: bool,
+
+    /// if it should run the assembly inside a virtual machine
+    #[argh(switch, short = 'r')]
+    run: bool,
+}
+
+fn u16_to_u8_array(array: &[u16]) -> Vec<u8> {
+    array.into_iter().flat_map(|x| x.to_be_bytes()).collect()
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -55,8 +64,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         return Err(std::io::Error::other("Compile error").into());
     };
 
-    for instruction in binary {
-        println!("{instruction:016b}");
+    if args.run {
+        let binary = u16_to_u8_array(&binary);
+        virtual_machine::program_loop(binary);
+    } else {
+        for instruction in &binary {
+            println!("{instruction:016b}");
+        }
     }
 
     Ok(())
