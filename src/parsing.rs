@@ -2,10 +2,7 @@ use nom::{
     Err, IResult, Parser,
     branch::alt,
     bytes::complete::tag,
-    character::{
-        complete::{alpha1, digit1},
-        multispace0,
-    },
+    character::complete::{alpha1, digit1, multispace0},
     combinator::map,
     multi::separated_list1,
     sequence::{delimited, pair, terminated},
@@ -65,14 +62,14 @@ fn parse_word(input: &str) -> IResult<&str, &str> {
 }
 
 fn ws(input: &str) -> IResult<&str, &str> {
-    multispace0().parse(input)
+    multispace0.parse(input)
 }
 
 fn parse_instruction(input: &str) -> IResult<&str, Instruction> {
     map(
         pair(
             terminated(parse_word, ws),
-            separated_list1(terminated(tag(","), ws), parse_arg),
+            separated_list1(terminated(tag(","), ws), terminated(parse_arg, ws)),
         ),
         |(tag, args)| Instruction {
             name: tag.to_string(),
@@ -112,7 +109,10 @@ pub fn parse_string(content: &str) -> Option<Vec<Line>> {
 
         if let Err(err) = parse_result {
             match err {
-                Err::Incomplete(_) => todo!(),
+                Err::Incomplete(_) => {
+                    println!("Parsing error on line {line}: input is incomplete");
+                    found_error = true;
+                }
                 Err::Error(e) => {
                     let input = e.input;
                     println!("Parsing error on line {line}: Couldn't parse '{input}'");
