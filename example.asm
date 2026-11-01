@@ -3,28 +3,65 @@ mov rsp, 0
 jmp main
 
 
-add:
+sum_of:
   push rbp
   mov rbp, rsp
 
-  ; mov [rbp - 2], cx
-  mov tx, 2
-  add tx, rbp, tx
+  ; mov [rbp + 20], cx
+  add tx, rbp, 20
   mov [tx], cx
 
-  ; mov ax, [rbp - 2]
-  mov tx, 2
-  add tx, rbp, tx
+  ; mov [rbp + 4], 0
+  mov ax, 0
+  add tx, rbp, 4
+  mov [tx], ax
+
+  ; mov [rbp + 8], 0
+  mov ax, 0
+  add tx, rbp, 8
+  mov [tx], ax
+
+  jmp L2
+L3:
+  ; mov ax, [rbp + 8]
+  add tx, rbp, 8
   mov ax, [tx]
 
-  add ax, 2
+  ; add [rbp + 4], ax
+  add tx, rbp, 4
+  mov bx, [tx]
+  add ax, bx
+  mov [tx], ax
+
+  ; add [rbp + 8], 1
+  add tx, rbp, 8
+  mov ax, [tx]
+  add ax, 1
+  add tx, rbp, 8
+  mov [tx], ax
+
+L2:
+  ; mov ax, [rbp + 8]
+  add tx, rbp, 8
+  mov ax, [tx]
+
+  ; cmp ax, [rbp + 20]
+  add tx, rbp, 20
+  mov bx, [tx]
+  cmp ax, bx
+
+  jng L3
+
+  ; mov ax, [rbp + 4]
+  add tx, rbp, 4
+  mov ax, [tx]
 
   pop rbp
   ret
 
 
 main:
-  mov cx, 20
-  call add
+  mov cx, 5
+  call sum_of
   out ax
 

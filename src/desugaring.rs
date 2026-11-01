@@ -42,6 +42,10 @@ pub fn desugar_lines(lines: Vec<Line>) -> Option<Vec<Line>> {
                     if desugar_constant_move(&mut result, &line, instruction) {
                         continue;
                     }
+
+                    if desugar_constant_move_3(&mut result, &line, instruction) {
+                        continue;
+                    }
                 }
 
                 _ => {}
@@ -307,6 +311,34 @@ fn desugar_constant_move(result: &mut Vec<Line>, line: &Line, instruction: &Inst
         expr: Expr::Instruction(Instruction {
             name: instruction.name.clone(),
             args: vec![instruction.args[0].clone(), Arg::Register(Register::TX)],
+        }),
+    });
+
+    true
+}
+
+fn desugar_constant_move_3(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -> bool {
+    if instruction.args.len() != 3 || !matches!(instruction.args[2], Arg::Constant(_)) {
+        return false;
+    }
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: "mov".into(),
+            args: vec![Arg::Register(Register::TX), instruction.args[2].clone()],
+        }),
+    });
+
+    result.push(Line {
+        line_number: line.line_number,
+        expr: Expr::Instruction(Instruction {
+            name: instruction.name.clone(),
+            args: vec![
+                instruction.args[0].clone(),
+                instruction.args[1].clone(),
+                Arg::Register(Register::TX),
+            ],
         }),
     });
 

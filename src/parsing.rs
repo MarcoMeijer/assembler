@@ -2,9 +2,9 @@ use nom::{
     Err, IResult, Parser,
     branch::alt,
     bytes::complete::tag,
-    character::complete::{alpha1, digit1, multispace0},
-    combinator::map,
-    multi::separated_list0,
+    character::complete::{alpha1, alphanumeric1, digit1, multispace0},
+    combinator::{map, recognize},
+    multi::{many0_count, separated_list0},
     sequence::{delimited, pair, terminated},
 };
 
@@ -56,8 +56,12 @@ fn parse_memory(input: &str) -> IResult<&str, Register> {
     delimited(tag("["), parse_register, tag("]")).parse(input)
 }
 
-fn parse_word(input: &str) -> IResult<&str, &str> {
-    alpha1(input)
+pub fn parse_word(input: &str) -> IResult<&str, &str> {
+    recognize(pair(
+        alt((alpha1, tag("_"))),
+        many0_count(alt((alphanumeric1, tag("_")))),
+    ))
+    .parse(input)
 }
 
 fn parse_arg(input: &str) -> IResult<&str, Arg> {
