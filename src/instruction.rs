@@ -29,11 +29,12 @@ impl Register {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Arg {
     Constant(u16),
     Register(Register),
     Ram(Register),
+    Tag(String),
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]

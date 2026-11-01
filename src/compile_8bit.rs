@@ -68,11 +68,13 @@ pub fn compile_lines_8bit(lines: &[Line]) -> Option<Vec<u8>> {
 
 fn compile_mov(instruction: &Instruction) -> Result<u8, String> {
     expect_arg_count(instruction, 2)?;
-    let arg1 = instruction.args[0];
-    let arg2 = instruction.args[1];
+    let arg1 = &instruction.args[0];
+    let arg2 = &instruction.args[1];
 
     match (arg1, arg2) {
         (Arg::Constant(_), _) => return Err("Can't move into a constant".into()),
+        (Arg::Tag(_), _) => return Err("Can't move into a tag".into()),
+        (_, Arg::Tag(_)) => return Err("Can't move a tag into constant".into()),
         (Arg::Ram(_), Arg::Constant(_)) => {
             return Err("Can't move constant directly into ram".into());
         }
@@ -80,26 +82,26 @@ fn compile_mov(instruction: &Instruction) -> Result<u8, String> {
             return Err("Can't move ram value directly into ram".into());
         }
         (Arg::Register(r), Arg::Constant(x)) => {
-            if r != Register::Reg1 {
+            if *r != Register::Reg1 {
                 return Err("Can only move constant into register 1".into());
             }
-            Ok(x as u8)
+            Ok(*x as u8)
         }
         (Arg::Register(dest), Arg::Register(a)) => Ok(MOVE | dest.u8() | a.u8() << ARG_A_POS),
         (Arg::Register(register), Arg::Ram(ram)) => {
-            if register != Register::Reg1 {
+            if *register != Register::Reg1 {
                 return Err("Can only move ram value into register 1".into());
             }
-            if ram != Register::Reg2 {
+            if *ram != Register::Reg2 {
                 return Err("Can only use register 2 as ram address".into());
             }
             Ok(READ_RAM_U8)
         }
         (Arg::Ram(ram), Arg::Register(register)) => {
-            if register != Register::Reg1 {
+            if *register != Register::Reg1 {
                 return Err("Can only write register 1 to ram".into());
             }
-            if ram != Register::Reg2 {
+            if *ram != Register::Reg2 {
                 return Err("Can only use register 2 as ram address".into());
             }
             Ok(WRITE_RAM_U8)
@@ -141,16 +143,16 @@ fn compile_eq(instruction: &Instruction) -> Result<u8, String> {
 
 fn compile_operation(instruction: &Instruction, opcode: u8) -> Result<u8, String> {
     expect_arg_count(instruction, 3)?;
-    let arg1 = instruction.args[0];
-    let arg2 = instruction.args[1];
-    let arg3 = instruction.args[2];
+    let arg1 = &instruction.args[0];
+    let arg2 = &instruction.args[1];
+    let arg3 = &instruction.args[2];
 
     match (arg1, arg2, arg3) {
         (Arg::Register(dest), Arg::Register(a), Arg::Register(b)) => {
-            if a != Register::Reg1 {
+            if *a != Register::Reg1 {
                 return Err("Argument a should be register 1".into());
             }
-            if b != Register::Reg2 {
+            if *b != Register::Reg2 {
                 return Err("Argument b should be register 2".into());
             }
             Ok(opcode | dest.u8() << ARG_A_POS)
@@ -163,12 +165,12 @@ fn compile_operation(instruction: &Instruction, opcode: u8) -> Result<u8, String
 
 fn compile_single_arg_operation(instruction: &Instruction, opcode: u8) -> Result<u8, String> {
     expect_arg_count(instruction, 2)?;
-    let arg1 = instruction.args[0];
-    let arg2 = instruction.args[1];
+    let arg1 = &instruction.args[0];
+    let arg2 = &instruction.args[1];
 
     match (arg1, arg2) {
         (Arg::Register(dest), Arg::Register(a)) => {
-            if a != Register::Reg1 {
+            if *a != Register::Reg1 {
                 return Err("Argument a should be register 1".into());
             }
             Ok(opcode | dest.u8() << ARG_A_POS)

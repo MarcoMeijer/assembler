@@ -7,15 +7,25 @@ const BITWISE_OR: u16 = 0b01000000_00000000;
 const BITWISE_NAND: u16 = 0b01000000_00000001;
 const BITWISE_AND: u16 = 0b01000000_00000010;
 const BITWISE_NOR: u16 = 0b01000000_00000011;
-const BITWISE_ADD: u16 = 0b01000000_00000100;
-const BITWISE_SUB: u16 = 0b01000000_00000101;
+const ADD: u16 = 0b01000000_00000100;
+const SUB: u16 = 0b01000000_00000101;
+const CMP: u16 = 0b01000000_00000110;
 
-const READ_RAM_U16: u16 = 0b0001;
-const WRITE_RAM_U16: u16 = 0b0011;
+const JE: u16 = 0b11001000_00000000;
+const JNE: u16 = 0b11001000_00000001;
+const JG: u16 = 0b11001000_00000010;
+const JNG: u16 = 0b11001000_00000011;
+const JL: u16 = 0b11001000_00000100;
+const JLE: u16 = 0b11001000_00000101;
+const JMP: u16 = 0b11001000_00000110;
+
+const READ_RAM_U16: u16 = 0b10000000_00000001;
+const WRITE_RAM_U16: u16 = 0b10000000_00000011;
+const OUTPUT: u16 = 0b10000000_00000100;
 
 const ARG_A_POS: usize = 11;
-const ARG_B_POS: usize = 7;
-const DEST_POS: usize = 4;
+const ARG_B_POS: usize = 8;
+const DEST_POS: usize = 5;
 
 pub type InstructionCompiler = fn(&Instruction) -> Result<u16, String>;
 
@@ -39,6 +49,15 @@ pub fn compile_lines(lines: &[Line]) -> Option<Vec<u16>> {
                     "nor" => compile_nor,
                     "add" => compile_add,
                     "sub" => compile_sub,
+                    "cmp" => compile_cmp,
+                    "je" => compile_je,
+                    "jne" => compile_jne,
+                    "jg" => compile_jg,
+                    "jng" => compile_jng,
+                    "jl" => compile_jl,
+                    "jle" => compile_jle,
+                    "jmp" => compile_jmp,
+                    "out" => compile_output,
                     x => {
                         println!("Unknown instruction on line {line_number}: '{x}'");
                         error = true;
@@ -67,11 +86,13 @@ pub fn compile_lines(lines: &[Line]) -> Option<Vec<u16>> {
 
 fn compile_mov(instruction: &Instruction) -> Result<u16, String> {
     expect_arg_count(instruction, 2)?;
-    let arg1 = instruction.args[0];
-    let arg2 = instruction.args[1];
+    let arg1 = &instruction.args[0];
+    let arg2 = &instruction.args[1];
 
     match (arg1, arg2) {
         (Arg::Constant(_), _) => return Err("Can't move into a constant".into()),
+        (Arg::Tag(_), _) => return Err("Can't move into a tag".into()),
+        (_, Arg::Tag(_)) => return Err("Can't move a tag into constant".into()),
         (Arg::Ram(_), Arg::Constant(_)) => {
             return Err("Can't move constant directly into ram".into());
         }
@@ -79,19 +100,19 @@ fn compile_mov(instruction: &Instruction) -> Result<u16, String> {
             return Err("Can't move ram value directly into ram".into());
         }
         (Arg::Register(r), Arg::Constant(x)) => {
-            if r != Register::Reg1 {
+            if *r != Register::Reg1 {
                 return Err("Can only move constant into register 1".into());
             }
-            Ok(x)
+            Ok(*x)
         }
         (Arg::Register(dest), Arg::Register(a)) => {
             Ok(ALU | dest.u16() << DEST_POS | a.u16() << ARG_A_POS)
         }
         (Arg::Register(register), Arg::Ram(ram)) => {
-            Ok(IO | READ_RAM_U16 | register.u16() << DEST_POS | ram.u16() << ARG_A_POS)
+            Ok(READ_RAM_U16 | register.u16() << DEST_POS | ram.u16() << ARG_A_POS)
         }
         (Arg::Ram(ram), Arg::Register(register)) => {
-            Ok(IO | WRITE_RAM_U16 | ram.u16() << ARG_A_POS | register.u16() << ARG_B_POS)
+            Ok(WRITE_RAM_U16 | ram.u16() << ARG_A_POS | register.u16() << ARG_B_POS)
         }
     }
 }
@@ -113,23 +134,110 @@ fn compile_nor(instruction: &Instruction) -> Result<u16, String> {
 }
 
 fn compile_add(instruction: &Instruction) -> Result<u16, String> {
-    compile_operation(instruction, BITWISE_ADD)
+    compile_operation(instruction, ADD)
 }
 
 fn compile_sub(instruction: &Instruction) -> Result<u16, String> {
-    compile_operation(instruction, BITWISE_SUB)
+    compile_operation(instruction, SUB)
+}
+
+fn compile_cmp(instruction: &Instruction) -> Result<u16, String> {
+    compile_operation_no_dest(instruction, CMP)
+}
+
+fn compile_je(instruction: &Instruction) -> Result<u16, String> {
+    compile_no_args(instruction, JE)
+}
+
+fn compile_jne(instruction: &Instruction) -> Result<u16, String> {
+    compile_no_args(instruction, JNE)
+}
+
+fn compile_jg(instruction: &Instruction) -> Result<u16, String> {
+    compile_no_args(instruction, JG)
+}
+
+fn compile_jng(instruction: &Instruction) -> Result<u16, String> {
+    compile_no_args(instruction, JNG)
+}
+
+fn compile_jl(instruction: &Instruction) -> Result<u16, String> {
+    compile_no_args(instruction, JL)
+}
+
+fn compile_jle(instruction: &Instruction) -> Result<u16, String> {
+    compile_no_args(instruction, JLE)
+}
+
+fn compile_jmp(instruction: &Instruction) -> Result<u16, String> {
+    compile_no_args(instruction, JMP)
+}
+
+fn compile_output(instruction: &Instruction) -> Result<u16, String> {
+    compile_single_arg_operation(instruction, OUTPUT)
+}
+
+fn compile_no_args(instruction: &Instruction, opcode: u16) -> Result<u16, String> {
+    expect_arg_count(instruction, 0)?;
+    Ok(opcode)
 }
 
 fn compile_operation(instruction: &Instruction, opcode: u16) -> Result<u16, String> {
+    if instruction.args.len() == 2 {
+        return compile_operation_dest_is_a(instruction, opcode);
+    }
+
     expect_arg_count(instruction, 3)?;
-    let arg1 = instruction.args[0];
-    let arg2 = instruction.args[1];
-    let arg3 = instruction.args[2];
+    let arg1 = &instruction.args[0];
+    let arg2 = &instruction.args[1];
+    let arg3 = &instruction.args[2];
 
     match (arg1, arg2, arg3) {
         (Arg::Register(dest), Arg::Register(a), Arg::Register(b)) => {
             Ok(opcode | dest.u16() << DEST_POS | a.u16() << ARG_A_POS | b.u16() << ARG_B_POS)
         }
+        _ => {
+            return Err("Can only do this operation on registers".into());
+        }
+    }
+}
+
+fn compile_operation_dest_is_a(instruction: &Instruction, opcode: u16) -> Result<u16, String> {
+    expect_arg_count(instruction, 2)?;
+    let arg1 = &instruction.args[0];
+    let arg2 = &instruction.args[1];
+
+    match (arg1, arg2) {
+        (Arg::Register(a), Arg::Register(b)) => {
+            Ok(opcode | a.u16() << DEST_POS | a.u16() << ARG_A_POS | b.u16() << ARG_B_POS)
+        }
+        _ => {
+            return Err("Can only do this operation on registers".into());
+        }
+    }
+}
+
+fn compile_operation_no_dest(instruction: &Instruction, opcode: u16) -> Result<u16, String> {
+    expect_arg_count(instruction, 2)?;
+    let arg1 = &instruction.args[0];
+    let arg2 = &instruction.args[1];
+
+    match (arg1, arg2) {
+        (Arg::Register(a), Arg::Register(b)) => {
+            Ok(opcode | a.u16() << ARG_A_POS | b.u16() << ARG_B_POS)
+        }
+        _ => {
+            return Err("Can only do this operation on registers".into());
+        }
+    }
+}
+
+fn compile_single_arg_operation(instruction: &Instruction, opcode: u16) -> Result<u16, String> {
+    expect_arg_count(instruction, 1)?;
+    let arg1 = &instruction.args[0];
+
+    match arg1 {
+        Arg::Register(a) => Ok(opcode | a.u16() << ARG_A_POS),
         _ => {
             return Err("Can only do this operation on registers".into());
         }

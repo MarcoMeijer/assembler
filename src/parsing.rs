@@ -4,7 +4,7 @@ use nom::{
     bytes::complete::tag,
     character::complete::{alpha1, digit1, multispace0},
     combinator::map,
-    multi::separated_list1,
+    multi::{separated_list0, separated_list1},
     sequence::{delimited, pair, terminated},
 };
 
@@ -48,17 +48,18 @@ fn parse_memory(input: &str) -> IResult<&str, Register> {
     delimited(tag("["), parse_register, tag("]")).parse(input)
 }
 
+fn parse_word(input: &str) -> IResult<&str, &str> {
+    alpha1(input)
+}
+
 fn parse_arg(input: &str) -> IResult<&str, Arg> {
     alt((
         map(parse_register, |x| Arg::Register(x)),
         map(parse_memory, |x| Arg::Ram(x)),
         map(parse_number, |x| Arg::Constant(x)),
+        map(parse_word, |x| Arg::Tag(x.into())),
     ))
     .parse(input)
-}
-
-fn parse_word(input: &str) -> IResult<&str, &str> {
-    alpha1(input)
 }
 
 fn ws(input: &str) -> IResult<&str, &str> {
@@ -69,7 +70,7 @@ fn parse_instruction(input: &str) -> IResult<&str, Instruction> {
     map(
         pair(
             terminated(parse_word, ws),
-            separated_list1(terminated(tag(","), ws), terminated(parse_arg, ws)),
+            separated_list0(terminated(tag(","), ws), terminated(parse_arg, ws)),
         ),
         |(tag, args)| Instruction {
             name: tag.to_string(),
@@ -85,8 +86,8 @@ fn parse_tag(input: &str) -> IResult<&str, Tag> {
 
 fn parse_expr(input: &str) -> IResult<&str, Expr> {
     alt((
-        map(parse_instruction, |i| Expr::Instruction(i)),
         map(parse_tag, |i| Expr::Tag(i)),
+        map(parse_instruction, |i| Expr::Instruction(i)),
     ))
     .parse(input)
 }

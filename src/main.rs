@@ -2,11 +2,13 @@ mod compile_8bit;
 mod compiler;
 mod instruction;
 mod parsing;
+mod tag_resolver;
 
 pub use compile_8bit::*;
 pub use compiler::*;
 pub use instruction::*;
 pub use parsing::*;
+use tag_resolver::resolve_tags;
 
 use std::error::Error;
 use std::fs;
@@ -26,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let content: String = fs::read_to_string("example.asm")?;
 
-    let Some(lines) = parse_string(&content) else {
+    let Some(mut lines) = parse_string(&content) else {
         return Err(std::io::Error::other("Parse error").into());
     };
 
@@ -40,6 +42,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         return Ok(());
     }
+
+    resolve_tags(&mut lines, 2);
 
     let Some(binary) = compile_lines(&lines) else {
         return Err(std::io::Error::other("Compile error").into());
