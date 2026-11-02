@@ -129,7 +129,7 @@ fn desugar_function_call(
     result.push(Line {
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
-            name: "add".into(),
+            name: "sub".into(),
             args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
         }),
     });
@@ -173,7 +173,7 @@ fn desugar_return(result: &mut Vec<Line>, line: &Line, instruction: &Instruction
     result.push(Line {
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
-            name: "sub".into(),
+            name: "add".into(),
             args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
         }),
     });
@@ -231,7 +231,7 @@ fn desugar_push(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) 
     result.push(Line {
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
-            name: "add".into(),
+            name: "sub".into(),
             args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
         }),
     });
@@ -259,7 +259,7 @@ fn desugar_pop(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -
     result.push(Line {
         line_number: line.line_number,
         expr: Expr::Instruction(Instruction {
-            name: "sub".into(),
+            name: "add".into(),
             args: vec![Arg::Register(Register::RSP), Arg::Register(Register::TX)],
         }),
     });
