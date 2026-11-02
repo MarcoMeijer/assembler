@@ -45,9 +45,15 @@ jnl label ; jump to label if last comparison was NOT a < b
 jg label ; jump to label if last comparison was a > b
 jng label ; jump to label if last comparison was a NOT > b
 
+add a, b ; a + b and store result into a
+sub a, b ; a - b and store result into a
+or a, b ; a | b and store result into a
+nor a, b ; ~(a | b) and store result into a
+and a, b ; a & b and store result into a
+nand a, b ; ~(a & b) and store result into a
+
 add d, a, b ; a + b and store result into d
 sub d, a, b ; a - b and store result into d
-
 or d, a, b ; a | b and store result into d
 nor d, a, b ; ~(a | b) and store result into d
 and d, a, b ; a & b and store result into d
