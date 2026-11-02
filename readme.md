@@ -22,7 +22,7 @@ ax, bx, cx, dx - general purpose registers
 rbp - Register Base Pointer
 rsp - Register Stack Pointer
 rip - Register Instruction Pointer
-tx - Temporary register, avoid using it as much as possible as other instructions use it
+tx - Temporary register, avoid using it as much as possible as other instructions can overwrite it
 ```
 
 Available operations:
