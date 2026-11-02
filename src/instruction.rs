@@ -34,6 +34,7 @@ pub enum Arg {
     Constant(u16),
     Register(Register),
     Ram(Register),
+    RamSub(Register, u16),
     Tag(String),
 }
 

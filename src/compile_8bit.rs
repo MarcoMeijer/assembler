@@ -106,6 +106,7 @@ fn compile_mov(instruction: &Instruction) -> Result<u8, String> {
             }
             Ok(WRITE_RAM_U8)
         }
+        (_, _) => return Err("Invalid arguments passed to mov".into()),
     }
 }
 

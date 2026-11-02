@@ -5,7 +5,7 @@ use nom::{
     character::complete::{alpha1, alphanumeric1, digit1, multispace0},
     combinator::{map, recognize},
     multi::{many0_count, separated_list0},
-    sequence::{delimited, pair, terminated},
+    sequence::{delimited, pair, separated_pair, terminated},
 };
 
 use crate::{Arg, Expr, Instruction, Line, Register, Tag};
@@ -58,6 +58,15 @@ fn parse_memory(input: &str) -> IResult<&str, Register> {
     delimited(tag("["), parse_register, tag("]")).parse(input)
 }
 
+fn parse_memory_sub(input: &str) -> IResult<&str, (Register, u16)> {
+    delimited(
+        tag("["),
+        separated_pair(parse_register, delimited(ws, tag("-"), ws), parse_number),
+        tag("]"),
+    )
+    .parse(input)
+}
+
 pub fn parse_word(input: &str) -> IResult<&str, &str> {
     recognize(pair(
         alt((alpha1, tag("_"))),
@@ -70,6 +79,7 @@ fn parse_arg(input: &str) -> IResult<&str, Arg> {
     alt((
         map(parse_register, |x| Arg::Register(x)),
         map(parse_memory, |x| Arg::Ram(x)),
+        map(parse_memory_sub, |(x, y)| Arg::RamSub(x, y)),
         map(parse_number, |x| Arg::Constant(x)),
         map(parse_word, |x| Arg::Tag(x.into())),
     ))

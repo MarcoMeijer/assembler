@@ -113,6 +113,7 @@ fn compile_mov(instruction: &Instruction) -> Result<u16, String> {
         (Arg::Ram(ram), Arg::Register(register)) => {
             Ok(WRITE_RAM_U16 | ram.u16() << ARG_A_POS | register.u16() << ARG_B_POS)
         }
+        (_, _) => return Err("Invalid arguments passed to mov".into()),
     }
 }
 

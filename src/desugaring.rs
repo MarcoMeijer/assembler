@@ -33,6 +33,10 @@ pub fn desugar_lines(lines: Vec<Line>) -> Option<Vec<Line>> {
                 }
 
                 "mov" => {
+                    if desugar_relative_memory(&mut result, &line, instruction) {
+                        continue;
+                    }
+
                     if desugar_constant_move(&mut result, &line, instruction) {
                         continue;
                     }
@@ -210,6 +214,7 @@ fn desugar_push(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) 
             Register::TX
         }
         Arg::Register(r) => r,
+        Arg::RamSub(_, _) => return None,
     };
 
     result.push(Line {
@@ -240,7 +245,7 @@ fn desugar_push(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) 
 }
 
 fn desugar_pop(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -> Option<()> {
-    if instruction.args.len() != 1 {
+    if instruction.args.len() != 1 || matches!(instruction.args[0], Arg::RamSub(_, _)) {
         println!(
             "Compile error on line {}: 'Pop expects one argument'",
             line.line_number
@@ -267,6 +272,7 @@ fn desugar_pop(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -
     let register = match instruction.args[0] {
         Arg::Constant(_) | Arg::Tag(_) | Arg::Ram(_) => Register::TX,
         Arg::Register(r) => r,
+        Arg::RamSub(_, _) => panic!("This should never happen"),
     };
 
     result.push(Line {
@@ -291,6 +297,49 @@ fn desugar_pop(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -
     }
 
     Some(())
+}
+
+fn desugar_relative_memory(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -> bool {
+    for i in 0..instruction.args.len() {
+        let &Arg::RamSub(reg, sub) = &instruction.args[i] else {
+            continue;
+        };
+
+        result.push(Line {
+            line_number: line.line_number,
+            expr: Expr::Instruction(Instruction {
+                name: "mov".into(),
+                args: vec![Arg::Register(Register::TX), Arg::Constant(sub)],
+            }),
+        });
+
+        result.push(Line {
+            line_number: line.line_number,
+            expr: Expr::Instruction(Instruction {
+                name: "sub".into(),
+                args: vec![
+                    Arg::Register(Register::TX),
+                    Arg::Register(reg),
+                    Arg::Register(Register::TX),
+                ],
+            }),
+        });
+
+        let mut args = instruction.args.clone();
+        args[i] = Arg::Ram(Register::TX);
+
+        result.push(Line {
+            line_number: line.line_number,
+            expr: Expr::Instruction(Instruction {
+                name: instruction.name.clone(),
+                args,
+            }),
+        });
+
+        return true;
+    }
+
+    false
 }
 
 fn desugar_constant_move(result: &mut Vec<Line>, line: &Line, instruction: &Instruction) -> bool {
