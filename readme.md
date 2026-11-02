@@ -29,6 +29,8 @@ mov register, [address] ; read from ram at address into register
 mov [address - const], register ; write register to ram at [address - const]
 mov register, [address - const] ; read from ram at [address - const] into register
 
+out register ; prints register to the console (Use this for debugging!)
+
 push register ; push register to stack
 pop register ; pop from stack and store value in register
 jmp label ; jump to label
