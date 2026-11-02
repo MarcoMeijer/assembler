@@ -1,4 +1,4 @@
-use super::{CMP_REGISTER, PROGRAM_COUNTER, Register};
+use super::{CMP_REGISTER, LOAD_REGISTER, PROGRAM_COUNTER, Register};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {
@@ -112,13 +112,13 @@ pub fn decode_instruction(instruction: u16) -> Instruction {
 
     match mode {
         Mode::Constant(_) => {
-            destination = 1;
+            destination = LOAD_REGISTER;
         }
         Mode::ALU(Opcode::Cmp) => {
             destination = CMP_REGISTER;
         }
         Mode::IO(IO::WriteRamU8 | IO::WriteRamU16 | IO::Output | IO::Noop) => {
-            destination = 0;
+            destination = 9;
         }
         Mode::Jump(_) => {
             destination = PROGRAM_COUNTER;

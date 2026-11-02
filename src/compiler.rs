@@ -10,13 +10,13 @@ const ADD: u16 = 0b01000000_00000100;
 const SUB: u16 = 0b01000000_00000101;
 const CMP: u16 = 0b01000000_00000110;
 
-const JE: u16 = 0b11001000_00000000;
-const JNE: u16 = 0b11001000_00000001;
-const JG: u16 = 0b11001000_00000010;
-const JNG: u16 = 0b11001000_00000011;
-const JL: u16 = 0b11001000_00000100;
-const JLE: u16 = 0b11001000_00000101;
-const JMP: u16 = 0b11001000_00000110;
+const JE: u16 = 0b11000000_00000000;
+const JNE: u16 = 0b11000000_00000001;
+const JG: u16 = 0b11000000_00000010;
+const JNG: u16 = 0b11000000_00000011;
+const JL: u16 = 0b11000000_00000100;
+const JLE: u16 = 0b11000000_00000101;
+const JMP: u16 = 0b11000000_00000110;
 
 const READ_RAM_U16: u16 = 0b10000000_00000001;
 const WRITE_RAM_U16: u16 = 0b10000000_00000011;
@@ -105,7 +105,7 @@ fn compile_mov(instruction: &Instruction) -> Result<u16, String> {
             Ok(*x)
         }
         (Arg::Register(dest), Arg::Register(a)) => {
-            Ok(ALU | dest.u16() << DEST_POS | a.u16() << ARG_A_POS)
+            Ok(ALU | dest.u16() << DEST_POS | a.u16() << ARG_A_POS | a.u16() << ARG_B_POS)
         }
         (Arg::Register(register), Arg::Ram(ram)) => {
             Ok(READ_RAM_U16 | register.u16() << DEST_POS | ram.u16() << ARG_A_POS)
