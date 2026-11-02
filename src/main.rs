@@ -28,6 +28,10 @@ struct AssemblerArgs {
     /// if it should run the assembly inside a virtual machine
     #[argh(switch, short = 'r')]
     run: bool,
+
+    /// what file it should compile
+    #[argh(option, short = 'f')]
+    file: Option<String>,
 }
 
 fn u16_to_u8_array(array: &[u16]) -> Vec<u8> {
@@ -37,7 +41,9 @@ fn u16_to_u8_array(array: &[u16]) -> Vec<u8> {
 fn main() -> Result<(), Box<dyn Error>> {
     let args: AssemblerArgs = argh::from_env();
 
-    let content: String = fs::read_to_string("example.asm")?;
+    let file_name = args.file.unwrap_or("example.asm".into());
+
+    let content: String = fs::read_to_string(&file_name)?;
 
     let Some(lines) = parse_string(&content) else {
         return Err(std::io::Error::other("Parse error").into());

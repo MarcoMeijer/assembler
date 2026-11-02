@@ -10,6 +10,12 @@ cargo run -- --run
 ```
 This will run `example.asm` (modify this file with your own code).
 
+To make it run another file you can do:
+```
+cargo run -- --run --file main.asm
+```
+This will run `main.asm`.
+
 Available registers:
 ```
 ax, bx, cx, dx - general purpose registers
